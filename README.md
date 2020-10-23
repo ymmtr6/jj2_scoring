@@ -4,10 +4,20 @@
 
 # run
 
+dockerの場合
 ```
 $ docker run -it --rm -v `pwd`:/workspace ymmtr6/jj2 05/5-2.yml --pre --post
 ```
 
+python3.7以上の場合
+```
+$ pip3 install openpyxl
+$ python3 run.py 05/5-2.yml --pre --post
+```
+
+# 事前準備
+
+採点用のExcelファイル(401-2.xlsx, 403-4.xlsx)をプロジェクトルートに配置する。
 
 # 採点方法
 
