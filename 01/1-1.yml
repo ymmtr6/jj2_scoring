@@ -1,0 +1,10 @@
+kadai: 1-1
+classname: HelloWorld
+numbers:
+  - 1
+rooms:
+  - 401
+  - 402
+output: output5-1.xlsx
+root: "05"
+book: 401-2.xlsx
