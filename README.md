@@ -11,7 +11,7 @@ $ docker run -it --rm -v `pwd`:/workspace ymmtr6/jj2 01/1-1.yml --pre --post
 
 python3.7以上の場合
 ```
-$ pip3 install openpyxl
+$ pip3 install -r requirements.txt
 $ python3 run.py 05/5-2.yml --pre --post
 ```
 
@@ -66,10 +66,9 @@ book: 401-2.xlsx
 ## ファイル構成
 ```
 .
-├── 03
-│   ├── 3-1ans.txt
-│   ├── 3-2ans.txt
-│   ├── 3-3ans.txt
+├── 01
+│   ├── ans1-1_1.txt
+│   ├── ans1-1_2.txt
 │   ├── post
 │   │   ├── 401
 │   │   ├── 402
@@ -85,6 +84,8 @@ book: 401-2.xlsx
 │   │   └── miteishutu.txt
 │   ├── pre
 │   │   ├── 401
+│   │   │   ├── HelloWorld1.err
+│   │   │   ├── HelloWorld1.log
 │   │   ├── 402
 │   │   ├── 403
 │   │   ├── 404
