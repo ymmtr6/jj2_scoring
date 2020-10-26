@@ -333,17 +333,18 @@ class jj2_assert(object):
             logs[s[:10]] = s[10:].strip()
 
         if delay:
-            keys = [logs[k].strip() for k in self.scores.keys() if self.scores[k]
+            keys = [self.translate(logs[k].strip()) for k in self.scores.keys() if self.scores[k]
                     ["score"] not in self.skip_status and self.scores[k]["pre"] != "OK"]
         else:
-            keys = [logs[k].strip() for k in self.scores.keys()
+            keys = [self.translate(logs[k].strip()) for k in self.scores.keys()
                     if self.scores[k]["pre"] not in self.skip_status]
         # print(keys)
         counter = dict(Counter(keys))
-        f_answer = self.reformat(answer)
         counter.update(self.answer_master)
+        f_answer = self.reformat(answer)
+
         for k, v in counter.items():
-            if type(v) == str:
+            if type(v) == str:  # OK or NG
                 continue
             if f_answer in self.reformat(k):
                 counter[k] = "OK"
@@ -357,11 +358,12 @@ class jj2_assert(object):
                 self.score(k, "OK", delay)
                 self.print_score(k, delay)
                 continue
-            if not v or v not in counter:
+            if self.translate(v.strip()) not in counter:
+                # print(v)
                 self.print_score(k, delay)
                 continue
-            if counter[v]:
-                self.score(k, counter[v], delay)
+            if counter[self.translate(v.strip())]:
+                self.score(k, counter[self.translate(v.strip())], delay)
                 self.print_score(k, delay)
             else:
                 self.print_score(k, delay)
