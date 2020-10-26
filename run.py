@@ -33,11 +33,16 @@ if __name__ == "__main__":
         obj.run_v2("post", kadai=y["kadai"], numbers=y["numbers"],
                    classname=y["classname"], root=y["root"], rooms=y["rooms"])
         # save
+        print("""
+        #### 結果表示 ####
+        """)
         obj.print_status()
         obj.write_scores("{}.post.json".format(y["kadai"]))
         # write excel
         obj.write_excel(y["kadai"], y["book"], y["output"])
+        exit()
     if args.write:
         obj.load_scores("{}.post.json".format(y["kadai"]))
         obj.print_status()
         obj.write_excel(y["kadai"], y["book"], y["output"])
+        exit()

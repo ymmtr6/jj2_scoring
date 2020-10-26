@@ -332,10 +332,10 @@ class jj2_assert(object):
 
         if delay:
             keys = [logs[k].strip() for k in self.scores.keys() if self.scores[k]
-                    ["score"] != "未" and self.scores[k]["pre"] != "OK"]
+                    ["score"] not in self.skip_status and self.scores[k]["pre"] != "OK"]
         else:
             keys = [logs[k].strip() for k in self.scores.keys()
-                    if self.scores[k]["pre"] != "未"]
+                    if self.scores[k]["pre"] not in self.skip_status]
 
         counter = dict(Counter(keys))
         f_answer = self.reformat(answer)
