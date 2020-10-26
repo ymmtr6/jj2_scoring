@@ -56,6 +56,7 @@ class jj2_assert(object):
         else:
             self.load_members(members)
         self.skip_status = ["未", "RE", "CE"]
+        self.answer_master = {}
 
     def translate(self, input1):
         return input1.strip().translate(self.trans)
@@ -336,9 +337,12 @@ class jj2_assert(object):
             keys = [logs[k].strip() for k in self.scores.keys()
                     if self.scores[k]["pre"] != "未"]
 
-        counter = Counter(keys)
+        counter = dict(Counter(keys))
         f_answer = self.reformat(answer)
-        for k in counter.keys():
+        counter.update(self.answer_master)
+        for k, v in counter.items():
+            if type(v) == str:
+                continue
             if f_answer in self.reformat(k):
                 counter[k] = "OK"
             else:
@@ -357,6 +361,7 @@ class jj2_assert(object):
             else:
                 self.print_score(k, delay)
                 print("no_update")
+        self.answer_master = counter
 
     def print_score(self, student_id, delay):
         if delay:
