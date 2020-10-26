@@ -15,6 +15,7 @@
 notecheck
 *.xlsx
 *.json
+!resubmit.xlsx
 
 # Python
 __pycache__
