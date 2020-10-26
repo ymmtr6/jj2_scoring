@@ -6,7 +6,7 @@
 
 dockerの場合
 ```
-$ docker run -it --rm -v `pwd`:/workspace ymmtr6/jj2 05/5-2.yml --pre --post
+$ docker run -it --rm -v `pwd`:/workspace ymmtr6/jj2 01/1-1.yml --pre --post
 ```
 
 python3.7以上の場合

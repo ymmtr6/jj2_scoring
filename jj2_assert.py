@@ -7,6 +7,7 @@ import openpyxl
 import os
 import Levenshtein
 from collections import Counter
+from wasabi import color
 
 
 class jj2_assert(object):
@@ -57,7 +58,7 @@ class jj2_assert(object):
         self.skip_status = ["未", "RE", "CE"]
 
     def translate(self, input1):
-        return input1.strip().translate(self.trans).replace(" ", "").replace("\t", "")
+        return input1.strip().translate(self.trans)
 
     def reformat(self, input_str):
         input_str = input_str.strip().translate(self.trans)
@@ -135,10 +136,28 @@ class jj2_assert(object):
                 self.comments[n[:10]] = n.split("...")[1].strip()
 
     def diff(self, i1, i2):
+        """
         d = difflib.Differ()
         diff = d.compare(self.translate(i1).split(
             "\n"), self.translate(i2).split("\n"))
         return "\n".join(diff)
+        """
+        output = []
+        matcher = difflib.SequenceMatcher(
+            None, self.translate(i1), self.translate(i2))
+        # print(i1)
+        # print(i2)
+        for opcode, a0, a1, b0, b1 in matcher.get_opcodes():
+            if opcode == "equal":
+                output.append(i1[a0:a1])
+            elif opcode == "insert":
+                output.append(color(i2[b0:b1], fg=16, bg="green"))
+            elif opcode == "delete":
+                output.append(color(i1[a0:a1], fg=16, bg="red"))
+            elif opcode == "replace":
+                output.append(color(i2[b0:b1], fg=16, bg="green"))
+                output.append(color(i1[a0:a1], fg=16, bg="red"))
+        return "".join(output)
 
     def ask(self):
         while True:
@@ -311,10 +330,10 @@ class jj2_assert(object):
             logs[s[:10]] = s[10:].strip()
 
         if delay:
-            keys = [logs[k] for k in self.scores.keys() if self.scores[k]
+            keys = [logs[k].strip() for k in self.scores.keys() if self.scores[k]
                     ["score"] != "未" and self.scores[k]["pre"] != "OK"]
         else:
-            keys = [logs[k] for k in self.scores.keys()
+            keys = [logs[k].strip() for k in self.scores.keys()
                     if self.scores[k]["pre"] != "未"]
 
         counter = Counter(keys)

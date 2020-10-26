@@ -9,6 +9,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("CONFIG", help="採点設定ファイル(yml)")
 parser.add_argument("-1", "--pre", action="store_true", help="preを採点する")
 parser.add_argument("-2", "--post", action="store_true", help="postを採点する")
+parser.add_argument("-3", "--write", action="store_true",
+                    help="jsonファイルをexcelファイルに変換する")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -34,4 +36,8 @@ if __name__ == "__main__":
         obj.print_status()
         obj.write_scores("{}.post.json".format(y["kadai"]))
         # write excel
+        obj.write_excel(y["kadai"], y["book"], y["output"])
+    if args.write:
+        obj.load_scores("{}.post.json".format(y["kadai"]))
+        obj.print_status()
         obj.write_excel(y["kadai"], y["book"], y["output"])
