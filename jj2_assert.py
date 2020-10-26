@@ -250,7 +250,11 @@ class jj2_assert(object):
                 cell = ws.cell(rows[k], 6)
                 if v["score"] == "OK" and v["pre"] != "OK":
                     cell.value = "遅"
-                elif v["score"] != "OK":
+                elif v["score"] == "OK" and v["pre"] == "OK":
+                    continue
+                elif v["score"] == "" or v["pre"] == "":
+                    print("Score Not Found({}, {})", k, v)
+                else:
                     cell.value = v["score"]
                     room, name = self._get_row_info(ws, rows[k])
                     self._write_num(resubmit_ws, resubmit_counter,
