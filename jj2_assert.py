@@ -194,40 +194,6 @@ class jj2_assert(object):
                 #print("post {}({}:{})".format(number, target["score"], score))
                 pass
 
-    def scoring(self, ANSWER_FILE, NOTE_FILE, delay=False):
-        logs = {}
-        with open(ANSWER_FILE) as f:
-            answer = f.read()
-        with open(NOTE_FILE) as f:
-            note_str = f.read()
-        for s in re.split(self.pattern, note_str):
-            if not s:
-                continue
-            logs[s[:10]] = s[10:]
-        print("ANSEWR: {}".format(ANSWER_FILE))
-        print("NOTE: {}".format(NOTE_FILE))
-        f_answer = self.reformat(answer)
-        for n in logs.keys():
-            if self.scores[n]["pre"] == "OK" and delay:
-                print("{}: {}, {}".format(n, "OK",  jaro_winkler(
-                    f_answer, self.reformat(logs[n]))))
-                self.score(n, "OK", delay)
-                continue
-            if f_answer not in self.reformat(logs[n]):
-                print("{}: {}, {}".format(n, "NG",  jaro_winkler(
-                    f_answer, self.reformat(logs[n]))))
-                print(self.diff(answer, logs[n]).strip())
-                if self.scores[n]["score"] in self.skip_status and delay:
-                    continue
-                elif self.scores[n]["pre"] in self.skip_status and (not delay):
-                    continue
-                score = self.ask()
-                self.score(n, score, delay)
-            else:
-                print("{}: {}, {}".format(n, "OK",  jaro_winkler(
-                    f_answer, self.reformat(logs[n]))))
-                self.score(n, "OK", delay)
-
     def print_status(self):
         for k, v in self.scores.items():
             print("{},{},{}".format(k, v["pre"], v["score"]))
@@ -285,26 +251,13 @@ class jj2_assert(object):
         ws.cell(row, 4).value = kadai
         ws.cell(row, 5).value = score
 
-    def run(self, pattern="pre", kadai="5-3", numbers=[1, 2, 3], classname="MainForMetabolickChecker", root="05", rooms=[401, 402]):
-        delay = (pattern == "post")
-        print(root, pattern, classname)
-        self.no_submitted(os.path.join(
-            root, pattern + "/miteishutu.txt"), classname+".java", delay=delay)
-        for n in [str(i) for i in numbers]:
-            print('''
-        # ================
-        # {} {}:{}
-        # ================
-        '''.format(pattern, kadai, n))
-            for room in [str(i) for i in rooms]:
-                self.runtime_error(os.path.join(
-                    root, pattern, room, classname + n + ".err"), delay=delay)
-                self.scoring(os.path.join(root, "ans{}_{}.txt".format(kadai, n)),
-                             os.path.join(root, pattern, room, classname+n+".log"), delay=delay)
-
     def run_v2(self, pattern="pre", kadai="5-3", numbers=[1, 2, 3], classname="MainForMetabolickChecker", root="05", rooms=[401, 402]):
+        """
+        pre/postの採点を一巡行う
+        """
         delay = (pattern == "post")
         print(root, pattern, classname)
+        # 未提出確認
         self.no_submitted(os.path.join(
             root, pattern + "/miteishutu.txt"), classname+".java", delay=delay)
         for n in [str(i) for i in numbers]:
@@ -314,12 +267,17 @@ class jj2_assert(object):
         # ================
         '''.format(pattern, kadai, n))
             for room in [str(i) for i in rooms]:
+                # Runtime Error
                 self.runtime_error(os.path.join(
                     root, pattern, room, classname + n + ".err"), delay=delay)
+            # 採点
             self.scoring_v2(os.path.join(root, pattern, str(rooms[0]), classname+n+".log"),
                             os.path.join(root, pattern, str(rooms[1]), classname+n+".log"), os.path.join(root, "ans{}_{}.txt".format(kadai, n)), delay=delay)
 
     def scoring_v2(self, NOTE_FILE, NOTE_FILE2, ANSWER_FILE, delay):
+        """
+        Answerと比較して正誤を決め、記録する
+        """
         logs = {}
         with open(ANSWER_FILE) as f:
             answer = f.read()
