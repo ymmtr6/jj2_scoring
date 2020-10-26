@@ -43,7 +43,7 @@ rooms:
 output: output5-1.xlsx
 # 課題Root
 root: '05'
-# 採点ファイルのテンプレート。
+# 採点ファイルのテンプレート(401-1.xlsx or 403-4.xlsx)
 book: 401-2.xlsx
 ```
 

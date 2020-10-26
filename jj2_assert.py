@@ -59,7 +59,7 @@ class jj2_assert(object):
         self.answer_master = {}
 
     def translate(self, input1):
-        return input1.strip().translate(self.trans)
+        return input1.strip().translate(self.trans).replace(" ", "")
 
     def reformat(self, input_str):
         input_str = input_str.strip().translate(self.trans)
@@ -144,20 +144,22 @@ class jj2_assert(object):
         return "\n".join(diff)
         """
         output = []
+        a = self.translate(i1)
+        b = self.translate(i2)
         matcher = difflib.SequenceMatcher(
-            None, self.translate(i1), self.translate(i2))
+            None, a, b)
         # print(i1)
         # print(i2)
         for opcode, a0, a1, b0, b1 in matcher.get_opcodes():
             if opcode == "equal":
-                output.append(i1[a0:a1])
+                output.append(a[a0:a1])
             elif opcode == "insert":
-                output.append(color(i2[b0:b1], fg=16, bg="green"))
+                output.append(color(b[b0:b1], fg=16, bg="green"))
             elif opcode == "delete":
-                output.append(color(i1[a0:a1], fg=16, bg="red"))
+                output.append(color(a[a0:a1], fg=16, bg="red"))
             elif opcode == "replace":
-                output.append(color(i2[b0:b1], fg=16, bg="green"))
-                output.append(color(i1[a0:a1], fg=16, bg="red"))
+                output.append(color(b[b0:b1], fg=16, bg="green"))
+                output.append(color(a[a0:a1], fg=16, bg="red"))
         return "".join(output)
 
     def ask(self):
