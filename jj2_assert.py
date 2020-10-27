@@ -297,20 +297,25 @@ class jj2_assert(object):
         if delay:
             keys = [self.translate(logs[k].strip()) for k in self.scores.keys() if self.scores[k]
                     ["score"] not in self.skip_status and self.scores[k]["pre"] != "OK"]
+            student_id_list=[k for k in self.scores.keys() if self.scores[k]
+                    ["score"] not in self.skip_status and self.scores[k]["pre"] != "OK"]
         else:
             keys = [self.translate(logs[k].strip()) for k in self.scores.keys()
+                    if self.scores[k]["pre"] not in self.skip_status]
+            student_id_list=[k for k in self.scores.keys()
                     if self.scores[k]["pre"] not in self.skip_status]
         # print(keys)
         counter = dict(Counter(keys))
         counter.update(self.answer_master)
         f_answer = self.reformat(answer)
 
-        for k, v in counter.items():
+        for (k, v),student_id in zip(counter.items(),student_id_list):
             if type(v) == str:  # OK or NG
                 continue
             if f_answer in self.reformat(k):
                 counter[k] = "OK"
             else:
+                print("学籍番号:{}".format(student_id))
                 print("----- {}件 -----".format(counter[k], ANSWER_FILE))
                 print(self.diff(answer, k).strip())
                 counter[k] = self.ask()
