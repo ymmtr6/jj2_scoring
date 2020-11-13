@@ -4,6 +4,11 @@
 
 # run
 
+```
+$ git clone https://github.com/ymmtr6/jj2_scoring.git
+cd jj2_scoring
+```
+
 dockerの場合
 ```
 $ docker run -it --rm -v `pwd`:/workspace ymmtr6/jj2 01/1-1.yml --pre --post
