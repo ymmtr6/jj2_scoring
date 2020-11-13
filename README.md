@@ -6,8 +6,11 @@
 
 ```
 $ git clone https://github.com/ymmtr6/jj2_scoring.git
-cd jj2_scoring
+$ cd jj2_scoring
 ```
+
+**初期設定**
+採点用のExcelファイル(401-2.xlsx, 403-4.xlsx, resubmit.xlsx)をプロジェクトルートに配置する。
 
 dockerの場合
 ```
@@ -19,10 +22,6 @@ python3.7以上の場合
 $ pip3 install -r requirements.txt
 $ python3 run.py 05/5-2.yml --pre --post
 ```
-
-# 事前準備
-
-採点用のExcelファイル(401-2.xlsx, 403-4.xlsx)をプロジェクトルートに配置する。
 
 # 採点方法
 
