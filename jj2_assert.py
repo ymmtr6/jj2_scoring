@@ -11,8 +11,14 @@ from wasabi import color
 
 
 class jj2_assert(object):
+    """
+
+    """
 
     def __init__(self, members="401-2.txt"):
+        """
+        共通変数
+        """
         self.scores = {}
         self.trans = str.maketrans({
             "：": ":",
@@ -59,9 +65,15 @@ class jj2_assert(object):
         self.answer_master = {}
 
     def translate(self, input1):
+        """
+        表示向けにややこしい文字を変換する
+        """
         return input1.strip().translate(self.trans).replace(" ", "")
 
     def reformat(self, input_str):
+        """
+        正誤判定向けにややこしい文字を変換する
+        """
         input_str = input_str.strip().translate(self.trans)
         spliter = [
             "\n",
@@ -74,6 +86,9 @@ class jj2_assert(object):
         return re.sub(p, "", input_str)
 
     def load_members(self, filepath):
+        """
+        メンバーを読み込む
+        """
         with open(filepath) as f:
             strings = f.read().split("\n")
         for s in strings:
@@ -82,14 +97,23 @@ class jj2_assert(object):
             self.scores[s] = {"id": s, "pre": "", "score": ""}
 
     def load_scores(self, filepath):
+        """
+        途中採点結果を読み込む
+        """
         with open(filepath) as f:
             self.scores = json.load(f)
 
     def write_scores(self, filepath="output.json"):
+        """
+        採点結果を書き出す
+        """
         with open(filepath, "w") as f:
             json.dump(self.scores, f, indent=2, ensure_ascii=False)
 
     def no_submitted(self, filepath, filename, delay=False):
+        """
+        未提出者を判定する
+        """
         # print("未提出者読み込み")
         with open(filepath) as f:
             strings = f.read()
@@ -110,6 +134,9 @@ class jj2_assert(object):
                 self.score(n[:10], "未", delay)
 
     def runtime_error(self, filepath, delay=False):
+        """
+        実行エラーを判定する
+        """
         # print("エラーログ読み込み")
         with open(filepath) as f:
             strings = f.read()
@@ -119,6 +146,9 @@ class jj2_assert(object):
                 self.score(n[:10], "RE", delay)
 
     def comment_check(self, filepath, filename):
+        """
+        コメントチェックをする(未実装)
+        """
         with open(filepath) as f:
             strings = f.read()
         files = re.split("(?=-----\S+\.java)-----", strings)
@@ -138,10 +168,7 @@ class jj2_assert(object):
 
     def diff(self, i1, i2):
         """
-        d = difflib.Differ()
-        diff = d.compare(self.translate(i1).split(
-            "\n"), self.translate(i2).split("\n"))
-        return "\n".join(diff)
+        差分をとる
         """
         output = []
         a = self.translate(i1)
@@ -163,6 +190,9 @@ class jj2_assert(object):
         return "".join(output)
 
     def ask(self):
+        """
+        y/n入力を受け付ける
+        """
         while True:
             score = input("[OK(o)/WA(n)] >> ")
             if score == "o":
@@ -174,6 +204,9 @@ class jj2_assert(object):
         return score
 
     def score(self, number, score, delay):
+        """
+        採点を受け付けるインターフェース
+        """
         target = self.scores[number]
         if not delay:
             if target["pre"] == "":
@@ -195,10 +228,16 @@ class jj2_assert(object):
                 pass
 
     def print_status(self):
+        """
+        現在の状況を表示する
+        """
         for k, v in self.scores.items():
             print("{},{},{}".format(k, v["pre"], v["score"]))
 
     def write_excel(self, kadai, book="401-2.xlsx", output="output.xlsx", resubmit="resubmit.xlsx"):
+        """
+        Excelシートに書き込む
+        """
         wb = openpyxl.load_workbook(book)
         ws = wb["MT_kadai"]
         rows = {}
@@ -231,6 +270,9 @@ class jj2_assert(object):
         resubmit_wb.save("re-" + output)
 
     def load_members_xl(self, book="401-2.xlsx"):
+        """
+        Excelシートから読み込む
+        """
         wb = openpyxl.load_workbook(book)
         ws = wb["MT_kadai"]
         for row in ws["C4:C275"]:
@@ -239,12 +281,18 @@ class jj2_assert(object):
                 self.scores[s] = {"id": s, "pre": "", "score": ""}
 
     def _get_row_info(self, ws, row):
+        """
+        Excelシートの指定位置から情報を受け取る
+        """
         r = ws["A4:F275"]
         c = r[row-4]
         # room_number, name
         return c[0].value, c[3].value
 
     def _write_num(self, ws, row, room, number, name, kadai, score):
+        """
+        Excelシートに情報を書き込む
+        """
         ws.cell(row, 1).value = room
         ws.cell(row, 2).value = number
         ws.cell(row, 3).value = name
@@ -337,6 +385,9 @@ class jj2_assert(object):
         self.answer_master = counter
 
     def print_score(self, student_id, delay):
+        """
+        一人分の情報を表示する
+        """
         if delay:
             print("{}: {}".format(student_id,
                                   self.scores[student_id]["score"]))
@@ -346,6 +397,9 @@ class jj2_assert(object):
 
 
 def levenstein(str1, str2):
+    """
+    Levenstein距離(編集距離)を算出
+    """
     lev_dist = Levenshtein.distance(str1, str2)
     divider = len(str1) if len(str1) > len(str2) else len(str2)
     lev_dist = lev_dist / divider
@@ -354,6 +408,9 @@ def levenstein(str1, str2):
 
 
 def jaro_winkler(str1, str2):
+    """
+    JaroWinkler距離を算出
+    """
     jaro_dist = Levenshtein.jaro_winkler(str1, str2)
     return jaro_dist
 
