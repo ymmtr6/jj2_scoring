@@ -357,7 +357,7 @@ class jj2_assert(object):
         counter.update(self.answer_master)
         f_answer = self.reformat(answer)
 
-        for k, v in zip(counter.items()):
+        for k, v in counter.items():
             if type(v) == str:  # OK or NG
                 continue
             if f_answer in self.reformat(k):
