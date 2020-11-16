@@ -12,7 +12,7 @@ from wasabi import color
 
 class jj2_assert(object):
     """
-
+    採点を実施するプログラム
     """
 
     def __init__(self, members="401-2.txt"):
@@ -94,7 +94,7 @@ class jj2_assert(object):
         for s in strings:
             if not s:
                 continue
-            self.scores[s] = {"id": s, "pre": "", "score": ""}
+            self.scores[s] = {"id": s, "pre": "", "score": "", "reason": ""}
 
     def load_scores(self, filepath):
         """
@@ -132,6 +132,7 @@ class jj2_assert(object):
         for n in no_submitted:
             if n[:10] in self.scores.keys():
                 self.score(n[:10], "未", delay)
+                self.reason(n[:10], "未提出", delay)
 
     def runtime_error(self, filepath, delay=False):
         """
@@ -144,6 +145,7 @@ class jj2_assert(object):
         for n in r_error:
             if n[:10] in self.scores.keys():
                 self.score(n[:10], "RE", delay)
+                self.reason(n[:10], n[10:].strip(), delay)
 
     def comment_check(self, filepath, filename):
         """
@@ -224,8 +226,16 @@ class jj2_assert(object):
             elif target["score"] == "OK" and score != "OK":
                 target["score"] = score
             else:
+                if target["score"] == "WA" and score == "RE":
+                    target["score"] = "RE"
                 #print("post {}({}:{})".format(number, target["score"], score))
                 pass
+
+    def reason(self, n, r, delay):
+        target = self.scores[n]
+        if delay:
+            if target["reason"] == "":
+                target["reason"] = r
 
     def print_status(self):
         """
@@ -263,7 +273,7 @@ class jj2_assert(object):
                     cell.value = v["score"]
                     room, name = self._get_row_info(ws, rows[k])
                     self._write_num(resubmit_ws, resubmit_counter,
-                                    room, k, name, kadai, v["score"])
+                                    room, k, name, kadai, v["score"], v["reason"])
                     resubmit_counter += 1
 
         wb.save(output)
@@ -278,7 +288,8 @@ class jj2_assert(object):
         for row in ws["C4:C275"]:
             if row[0].value:
                 s = str(row[0].value)
-                self.scores[s] = {"id": s, "pre": "", "score": ""}
+                self.scores[s] = {"id": s, "pre": "",
+                                  "score": "", "reason": ""}
 
     def _get_row_info(self, ws, row):
         """
@@ -289,7 +300,7 @@ class jj2_assert(object):
         # room_number, name
         return c[0].value, c[3].value
 
-    def _write_num(self, ws, row, room, number, name, kadai, score):
+    def _write_num(self, ws, row, room, number, name, kadai, score, reason=""):
         """
         Excelシートに情報を書き込む
         """
@@ -298,6 +309,7 @@ class jj2_assert(object):
         ws.cell(row, 3).value = name
         ws.cell(row, 4).value = kadai
         ws.cell(row, 5).value = score
+        ws.cell(row, 6).value = reason
 
     def run_v2(self, pattern="pre", kadai="5-3", numbers=[1, 2, 3], classname="MainForMetabolickChecker", root="05", rooms=[401, 402]):
         """
@@ -394,6 +406,68 @@ class jj2_assert(object):
         else:
             print("{}: {}".format(student_id,
                                   self.scores[student_id]["pre"]))
+
+
+# def run_v2(self, pattern="pre", kadai="5-3", numbers=[1, 2, 3], classname="MainForMetabolickChecker", root="05", rooms=[401, 402]):
+
+
+    def check(self, kadai="5-3", numbers=[1, 2, 3], classname="LTM", root="05", rooms=[401, 402]):
+        pattern = "post"
+        tmp = {}
+        for i in [i for i in self.scores.keys() if self.scores[i]["score"] == "WA"]:
+            tmp[i] = []
+        for n in [str(i) for i in numbers]:
+            NOTE_FILE = os.path.join(
+                root, pattern, str(rooms[0]), classname+n+".log")
+            NOTE_FILE2 = os.path.join(root, pattern, str(
+                rooms[1]), classname+n+".log")
+            ANS_FILE = os.path.join(root, "ans{}_{}.txt".format(kadai, n))
+            self.check_logs(tmp, NOTE_FILE, NOTE_FILE2, ANS_FILE)
+            # self.check_error(tmp, os.path.join(
+            #    root, pattern, str(rooms[0]), classname+n+".err"), os.path.join(root, pattern, str(
+            #        rooms[1]), classname+n+".err"))
+        for key in tmp.keys():
+            print("==============================")
+            print(key)
+            for i in tmp[key]:
+                print("------------------------------")
+                print(i)
+
+    def check_error(self, tmp, NOTE_FILE, NOTE_FILE2):
+        with open(NOTE_FILE) as f:
+            strings = f.read()
+        r_error = re.split(self.pattern, strings)
+        for n in r_error:
+            if n[:10] in self.scores.keys():
+                tmp[n[:10]].append(n[10:])
+        with open(NOTE_FILE2) as f:
+            strings = f.read()
+        r_error = re.split(self.pattern, strings)
+        for n in r_error:
+            if n[:10] in self.scores.keys():
+                tmp[n[:10]].append(n[10:].strip())
+
+    def check_logs(self, tmp, NOTE_FILE, NOTE_FILE2, ANSWER_FILE):
+        logs = {}
+        with open(ANSWER_FILE) as f:
+            answer = f.read()
+        with open(NOTE_FILE) as f:
+            note_str = f.read()
+        for s in re.split(self.pattern, note_str):
+            if not s:
+                continue
+            logs[s[:10]] = s[10:].strip()
+        with open(NOTE_FILE2) as f:
+            note_str = f.read()
+        for s in re.split(self.pattern, note_str):
+            if not s:
+                continue
+            logs[s[:10]] = s[10:].strip()
+        for i in tmp.keys():
+            if i not in logs.keys():
+                tmp[i].append("")
+            else:
+                tmp[i].append(self.diff(answer, logs[i].strip()).strip())
 
 
 def levenstein(str1, str2):

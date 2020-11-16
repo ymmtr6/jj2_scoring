@@ -11,6 +11,7 @@ parser.add_argument("-1", "--pre", action="store_true", help="preを採点する
 parser.add_argument("-2", "--post", action="store_true", help="postを採点する")
 parser.add_argument("-3", "--write", action="store_true",
                     help="jsonファイルをexcelファイルに変換する")
+parser.add_argument("-4", "--check", action="store_true", help="間違いを確認する")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -45,4 +46,9 @@ if __name__ == "__main__":
         obj.load_scores("{}.post.json".format(y["kadai"]))
         obj.print_status()
         obj.write_excel(y["kadai"], y["book"], y["output"])
+        exit()
+    if args.check:
+        obj.load_scores("{}.post.json".format(y["kadai"]))
+        obj.check(kadai=y["kadai"], numbers=y["numbers"],
+                  classname=y["classname"], root=y["root"], rooms=y["rooms"])
         exit()
