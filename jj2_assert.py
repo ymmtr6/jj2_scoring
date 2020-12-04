@@ -216,7 +216,7 @@ class jj2_assert(object):
             elif target["pre"] == "OK" and score != "OK":
                 target["pre"] = score
             else:
-                #print("pre  {}({}:{})".format(number, target["pre"], score))
+                # print("pre  {}({}:{})".format(number, target["pre"], score))
                 pass
         else:
             if target["pre"] == "OK":
@@ -228,7 +228,7 @@ class jj2_assert(object):
             else:
                 if target["score"] == "WA" and score == "RE":
                     target["score"] = "RE"
-                #print("post {}({}:{})".format(number, target["score"], score))
+                # print("post {}({}:{})".format(number, target["score"], score))
                 pass
 
     def reason(self, n, r, delay):
@@ -396,6 +396,62 @@ class jj2_assert(object):
                 print("no_update")
         self.answer_master = counter
 
+    def scoring_re(self, NOTE_FILE, NOTE_FILE2, ANSWER_FILE, delay):
+        """
+        Answerと比較して正誤を決め、記録する
+        """
+        logs = {}
+        with open(ANSWER_FILE) as f:
+            answer = f.read()
+        with open(NOTE_FILE) as f:
+            note_str = f.read()
+        for s in re.split(self.pattern, note_str):
+            if not s:
+                continue
+            logs[s[:10]] = s[10:].strip()
+        with open(NOTE_FILE2) as f:
+            note_str = f.read()
+        for s in re.split(self.pattern, note_str):
+            if not s:
+                continue
+            logs[s[:10]] = s[10:].strip()
+
+        keys = [self.translate(logs[k].strip()) for k in self.scores.keys(
+        ) if self.scores[k]["score"] != "OK"]
+        # student_id_list = [k for k in self.scores.keys() if self.scores[k]
+        #                   ["score"] not in self.skip_status and self.scores[k]["pre"] != "OK"]
+
+        counter = dict(Counter(keys))
+        counter.update(self.answer_master)
+        f_answer = self.reformat(answer)
+
+        for k, v in counter.items():
+            if type(v) == str:  # OK or NG
+                continue
+            if f_answer in self.reformat(k):
+                counter[k] = "OK"
+            else:
+                print("----- {}件 -----".format(counter[k]))
+                print(self.diff(answer, k).strip())
+                counter[k] = self.ask()
+        # print(counter)
+        for k, v in logs.items():
+            if self.scores[k]["pre"] == "OK" and delay:
+                self.score(k, "OK", delay)
+                self.print_score(k, delay)
+                continue
+            if self.translate(v.strip()) not in counter:
+                # print(v)
+                self.print_score(k, delay)
+                continue
+            if counter[self.translate(v.strip())]:
+                self.score(k, counter[self.translate(v.strip())], delay)
+                self.print_score(k, delay)
+            else:
+                self.print_score(k, delay)
+                print("no_update")
+        self.answer_master = counter
+
     def print_score(self, student_id, delay):
         """
         一人分の情報を表示する
@@ -410,11 +466,9 @@ class jj2_assert(object):
 
 # def run_v2(self, pattern="pre", kadai="5-3", numbers=[1, 2, 3], classname="MainForMetabolickChecker", root="05", rooms=[401, 402]):
 
-
-    def check(self, kadai="5-3", numbers=[1, 2, 3], classname="LTM", root="05", rooms=[401, 402]):
-        pattern = "post"
+    def check(self, kadai="5-3", numbers=[1, 2, 3], classname="LTM", root="05", rooms=[401, 402], pattern="post"):
         tmp = {}
-        for i in [i for i in self.scores.keys() if self.scores[i]["score"] == "WA"]:
+        for i in [i for i in self.scores.keys() if self.scores[i]["score"] in self.skip_status or self.scores[i]["score"] == "WA"]:
             tmp[i] = []
         for n in [str(i) for i in numbers]:
             NOTE_FILE = os.path.join(
@@ -465,7 +519,7 @@ class jj2_assert(object):
             logs[s[:10]] = s[10:].strip()
         for i in tmp.keys():
             if i not in logs.keys():
-                tmp[i].append("")
+                tmp[i].append("Not Found")
             else:
                 tmp[i].append(self.diff(answer, logs[i].strip()).strip())
 
